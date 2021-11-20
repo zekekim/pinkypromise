@@ -17,7 +17,6 @@ final smsProvider = StateProvider<String>((ref) {
   return '';
 });
 
-final verificationProvider
- = StateProvider<String>((ref) {
+final verificationProvider = StateProvider<String>((ref) {
   return '';
 });
