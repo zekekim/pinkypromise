@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "897529068656",
+    "project_id": "pinky-87292",
+    "storage_bucket": "pinky-87292.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:897529068656:android:c0e839cd446a9e5ca648b5",
+        "android_client_info": {
+          "package_name": "com.example.pinkypromise"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "897529068656-8ap07lsvgk3a0jbfu35oc02jllr1iopk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDUSjWkA4LobNUvkSCfVyt-NkXlRGVqNzk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "897529068656-8ap07lsvgk3a0jbfu35oc02jllr1iopk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
