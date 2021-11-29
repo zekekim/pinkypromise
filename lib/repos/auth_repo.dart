@@ -48,17 +48,20 @@ class AuthRepositoryImpl implements AuthRepository {
     try {
       await _read(firebaseAuthProvider).verifyPhoneNumber(
         codeAutoRetrievalTimeout: (String verificationId) async {
-          //TODO: Implement
+          print('tiemd out');
         },
         codeSent: (String verificationId, int? forceResendingToken) async {
+          print('signing in');
           _read(verificationProvider).state = verificationId;
         },
         phoneNumber: _read(phoneNumberProvider).state,
         verificationCompleted: (PhoneAuthCredential phoneAuthCredential) async {
+          print('lol');
           await _read(firebaseAuthProvider)
               .signInWithCredential(phoneAuthCredential);
         },
         verificationFailed: (FirebaseAuthException error) async {
+          print('verification failed');
           throw CustomException(message: error.toString());
         },
       );

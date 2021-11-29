@@ -8,11 +8,14 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 import 'package:pinkypromise/controllers/auth_controller.dart';
 import 'package:pinkypromise/controllers/item_list_controller.dart';
+import 'package:pinkypromise/pages/nav_screen.dart';
 import 'package:pinkypromise/providers/auth_providers.dart';
 import 'package:pinkypromise/repos/custom_exception.dart';
 import 'package:sms_autofill/sms_autofill.dart';
+import 'dart:io';
 
 import 'models/item_model.dart';
+import 'pages/widgets/custom_tab_bar.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,19 +37,89 @@ class MyApp extends HookWidget {
     return MaterialApp(
       theme: ThemeData(
           fontFamily: 'PlayfairDisplay',
+          canvasColor: Colors.orange[100],
           primarySwatch: Colors.orange,
           scaffoldBackgroundColor: Colors.orange[50]),
-      home: authState != null ? const LoginPage() : const LoginPage(),
+      home: authState != null ? const HomePage() : const LoginPage(),
     );
   }
 }
 
-class HomePage extends HookWidget {
+class HomePage extends StatefulHookWidget {
   const HomePage({Key? key}) : super(key: key);
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    final authState = useProvider(authControllerProvider);
+    return Scaffold(
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              title: const Text("pinky promise"),
+              backgroundColor: Colors.orange[200],
+              floating: true,
+              forceElevated: innerBoxIsScrolled,
+              actions: const [
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.person),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8.0),
+                  child: Icon(Icons.settings),
+                )
+              ],
+            ),
+          ];
+        },
+        body: NavScreen(),
+      ),
+    );
+  }
+}
+
+class FriendsPage extends StatefulWidget {
+  const FriendsPage({Key? key}) : super(key: key);
+
+  @override
+  State<FriendsPage> createState() => _FriendsPageState();
+}
+
+class _FriendsPageState extends State<FriendsPage> {
+  final List<int> _items = List<int>.generate(50, (int index) => index);
+  @override
+  Widget build(BuildContext context) {
+    return ReorderableListView(
+      children: [
+        for (int index = 0; index < _items.length; index++)
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            key: Key('$index'),
+            child: ListTile(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0)),
+              tileColor: Colors.orange[100],
+              title: Text('Item ${_items[index]}'),
+            ),
+          ),
+      ],
+      onReorder: (int oldIndex, int newIndex) {
+        setState(() {
+          if (oldIndex < newIndex) {
+            newIndex -= 1;
+          }
+          final int item = _items.removeAt(oldIndex);
+          _items.insert(newIndex, item);
+        });
+      },
+    );
   }
 }
 
@@ -64,7 +137,6 @@ class _LoginPageState extends State<LoginPage> {
     var maskFormatter = MaskTextInputFormatter(
         mask: '(###) ###-####', filter: {"#": RegExp(r'[0-9]')});
     var phoneState = useProvider(phoneNumberProvider).state;
-    var authState = useProvider(authControllerProvider.notifier);
     var errorState = useProvider(authExceptionProvider).state;
 
     return Scaffold(
@@ -181,22 +253,43 @@ class _SmsPageState extends State<SmsPage> {
   @override
   Widget build(BuildContext context) {
     var sms = useProvider(smsProvider).state;
-    var authState = useProvider(authControllerProvider);
     var authNotifier = useProvider(authControllerProvider.notifier);
     return Scaffold(
       body: Center(
-        child: PinFieldAutoFill(
-          decoration: UnderlineDecoration(
-            colorBuilder: FixedColorBuilder(Colors.black.withOpacity(0.3)),
-          ),
-          currentCode: sms,
-          onCodeSubmitted: (code) {
-            authNotifier.signIn();
-            sms = code;
-          },
-          onCodeChanged: (code) {
-            sms = code ?? '';
-          },
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PinFieldAutoFill(
+              decoration: UnderlineDecoration(
+                colorBuilder: FixedColorBuilder(Colors.black.withOpacity(0.3)),
+              ),
+              currentCode: sms,
+              onCodeSubmitted: (code) {
+                context.read(smsProvider).state = code;
+                try {
+                  authNotifier.signIn();
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => HomePage()));
+                } on CustomException catch (e) {
+                  print(e.message);
+                }
+              },
+              onCodeChanged: (code) {
+                context.read(smsProvider).state = code ?? '';
+              },
+            ),
+            TextButton(
+                onPressed: () async {
+                  try {
+                    await authNotifier.signIn();
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (context) => HomePage()));
+                  } on CustomException catch (e) {
+                    print(e.message);
+                  }
+                },
+                child: const Text('submit'))
+          ],
         ),
       ),
     );

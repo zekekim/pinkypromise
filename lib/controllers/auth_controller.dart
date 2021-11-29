@@ -31,6 +31,7 @@ class AuthController extends StateNotifier<User?> {
       await _read(authRepositoryProvider).signInWithPhone();
     } on CustomException catch (e) {
       _read(authExceptionProvider).state = e;
+      print('e');
     }
   }
 
@@ -42,8 +43,7 @@ class AuthController extends StateNotifier<User?> {
             smsCode: _read(smsProvider).state),
       );
     } catch (e) {
-      _read(authExceptionProvider).state =
-          CustomException(message: e.toString());
+      throw CustomException(message: e.toString());
     }
   }
 
