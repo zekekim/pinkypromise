@@ -6,7 +6,7 @@ part 'item_model.freezed.dart';
 part 'item_model.g.dart';
 
 @freezed
-abstract class Item with _$Item {
+class Item with _$Item {
   const Item._();
   const factory Item({
     String? id,
